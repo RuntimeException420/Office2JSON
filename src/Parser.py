@@ -29,14 +29,17 @@ def read_file_content(path, file_name):
     file_path = os.path.join(path, file_name)
     if file_path.endswith(".xml") or file_path.endswith(".rels"):
         with open(file_path, encoding="utf8") as f:
-            return f.read()
+            return f.read().replace('"', "'")  # replace quotes so the json.dump does not escape them
     elif file_path.endswith(".bin"):
-        output = subprocess.check_output(["olevba", "--json", file_path]).decode("utf-8")
-        clean_output = output[output.find('container') - 1:].replace("\r\n", "")
-        clean_output = '{"' + clean_output[1:]
-        clean_output = clean_output[:-2]
-        clean_output = json.loads(clean_output)
-        return clean_output
+        try:
+            output = subprocess.check_output(["olevba", "--json", file_path]).decode("utf-8")
+            clean_output = output[output.find('container') - 1:].replace("\r\n", "")
+            clean_output = '{"' + clean_output[1:]
+            clean_output = clean_output[:clean_output.rindex("}") + 1]
+            clean_output = json.loads(clean_output)
+            return clean_output
+        except:
+            return ""
     return ""
 
 
@@ -68,5 +71,9 @@ if __name__ == '__main__':
         print("File was not found.\n" + e)
     except shutil.SameFileError as e:
         print("Error occurred.\n" + e)
+    except zipfile.BadZipfile as e:
+        print("Can't open file as archive.\n")
     finally:
-        shutil.rmtree(rel_path + "temp_extraction")
+        file = os.path.join(rel_path + "temp_extraction")
+        if os.path.exists(file):
+            shutil.rmtree(rel_path + "temp_extraction")
