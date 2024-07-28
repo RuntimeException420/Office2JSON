@@ -5,10 +5,9 @@ import argparse
 import subprocess
 import json
 import time
-import math
 
 
-def create_json(folder_path):
+def __create_json(folder_path):
     data = {}
 
     for root, d_names, f_names in os.walk(folder_path):  # walks recursively through the file system
@@ -42,7 +41,12 @@ def read_file_content(path, file_name):
             return clean_output
         except:
             return ""
-    return ""
+    elif file_path.endswith(".png") or file_path.endswith(".jpg"):
+        return ""
+    elif file_path.endswith(".vml"):
+        return "*vector markup language file*"  # commonly found in Excel files, usually benign
+    else:
+        return "*file type unknown, raise suspicion!*"  # indicator for other embedded objects
 
 
 def extract(file_path, output_path: str = None):
@@ -61,7 +65,7 @@ def extract(file_path, output_path: str = None):
     zip_copy.close()
 
     os.remove(rel_path + temp_name)
-    json_dict = create_json(rel_path + "temp_extraction")
+    json_dict = __create_json(rel_path + "temp_extraction")
     with open(os.path.join(rel_path, "extracted_" + file + ".json"), "w", encoding="utf-8") as res_file:
         json.dump(json_dict, res_file, indent=4)
 
@@ -77,6 +81,11 @@ if __name__ == '__main__':
         rel_path, _ = os.path.split(args.file)
         extract(args)
 
+        print(40 * "_")
+        print(f"Extraction time: \t{round(time.time() - start_time, 3)} seconds")
+        print(f"Extraction path: \t{rel_path + '/'}")
+        print(40 * "_")
+
     except FileNotFoundError as e:
         print("File was not found.\n" + e)
     except shutil.SameFileError as e:
@@ -88,9 +97,4 @@ if __name__ == '__main__':
         file = os.path.join(rel_path, "temp_extraction")
         if os.path.exists(file):
             shutil.rmtree(file)
-
-        print(40 * "_")
-        print(f"Extraction time: \t{round(time.time() - start_time, 3)} seconds")
-        print(f"Extraction path: \t{rel_path + '/'}")
-        print(40 * "_")
 
