@@ -31,7 +31,7 @@ def read_file_content(path, file_name):
     if file_path.endswith(".xml") or file_path.endswith(".rels"):
         with open(file_path, encoding="utf8") as f:
             return f.read().replace('"', "'")  # replace quotes so the json.dump does not escape them
-    elif file_path.endswith(".bin"):
+    elif file_path.endswith("vbaProject.bin"):
         try:
             output = subprocess.check_output(["olevba", "--json", file_path]).decode("utf-8")
             clean_output = output[output.find('container') - 1:].replace("\r\n", "")
@@ -41,7 +41,7 @@ def read_file_content(path, file_name):
             return clean_output
         except:
             return ""
-    elif file_path.endswith(".png") or file_path.endswith(".jpg"):
+    elif file_path.endswith(".png") or file_path.endswith(".PNG") or file_path.endswith(".jpg") or file_path.endswith(".jpeg"):
         return ""
     elif file_path.endswith(".vml"):
         return "*vector markup language file*"  # commonly found in Excel files, usually benign
