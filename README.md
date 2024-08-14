@@ -1,4 +1,7 @@
 # Office2JSON
+Extracts textual information out of OOXML files, such as .docx, .docm or .xlsx, and generates a JSON file with it.
 
-Input: Office-document <br>
-Output: JSON with file names and contents
+`pip install -r requirements.txt`
+
+## Usage
+`python Office2JSON.py *PathToOOXML*`
